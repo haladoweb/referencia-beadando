@@ -1,1 +1,9 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+@import 'flyonui/variants.css';
+@plugin "flyonui" {
+  themes: spotify --default, soft;
+}
+@source "../node_modules/flyonui/flyonui.js";
+@plugin "@iconify/tailwind4";
+
+@import 'maplibre-gl-draw/dist/mapbox-gl-draw.css';
