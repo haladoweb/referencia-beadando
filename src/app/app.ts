@@ -2,10 +2,11 @@ import { Component, inject, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Navbar } from './core/components/navbar/navbar';
 import { Spinner } from './core/components/spinner/spinner';
+import { Sidebar } from './core/components/sidebar/sidebar';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Navbar, Spinner],
+  imports: [RouterOutlet, Navbar, Spinner, Sidebar],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

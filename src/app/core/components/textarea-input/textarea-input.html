@@ -1,14 +1,12 @@
-<div class="input-floating w-96">
+<div class="textarea-floating sm:w-96">
   <textarea
+    id="textareaFloating"
     class="textarea"
-    [placeholder]="label()"
-    class="input"
-    id="floatingInput"
     [ngClass]="{ 'is-invalid': field()().touched() && field()().invalid() }"
+    [placeholder]="label()"
     [field]="field()"
   ></textarea>
-
-  <label class="input-floating-label" for="floatingInput">{{ label() }}</label>
+  <label class="textarea-floating-label" for="textareaFloating">{{ label() }}</label>
   @if(field()().touched() && field()().invalid()){
   <span class="helper-text">{{ field()().errors()[0].message }}</span>
   }

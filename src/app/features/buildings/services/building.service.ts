@@ -14,7 +14,19 @@ export class BuildingService {
     return this.http.get<Building[]>(`${this.buildingUrl}`);
   }
 
+  getBuildingById(buildingId: string) {
+    return this.http.get<Building>(`${this.buildingUrl}/${buildingId}`);
+  }
+
   createBuilding(building: Building) {
     return this.http.post<Building>(`${this.buildingUrl}`, building);
+  }
+
+  updateBuilding(building: Building) {
+    return this.http.put<Building>(`${this.buildingUrl}/${building.id}`, building);
+  }
+
+  deleteBuilding(buildingId: string) {
+    return this.http.delete(`${this.buildingUrl}/${buildingId}`);
   }
 }

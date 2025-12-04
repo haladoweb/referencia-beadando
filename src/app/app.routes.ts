@@ -1,18 +1,27 @@
 import { Routes } from '@angular/router';
-import { CreateBuilding } from './features/components/create-building/create-building';
+import { EditBuilding } from './features/components/edit-building/edit-building';
+import { BuildingsList } from './features/components/buildings-list/buildings-list';
 
 export const routes: Routes = [
   {
     path: 'buildings',
     children: [
       {
+        path: '',
+        component: BuildingsList,
+      },
+      {
+        path: ':id',
+        component: EditBuilding,
+      },
+      {
         path: 'create',
-        component: CreateBuilding,
+        component: EditBuilding,
       },
     ],
   },
   {
     path: '**',
-    redirectTo: 'buildings/create',
+    redirectTo: 'buildings',
   },
 ];

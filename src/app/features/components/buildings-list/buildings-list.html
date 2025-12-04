@@ -1,0 +1,50 @@
+<div class="card w-full h-full">
+  <div class="card-body">
+    <div class="flex justify-between">
+      <app-text-input [field]="searchForm.name" label="Search"></app-text-input>
+      <button class="btn btn-soft btn-primary" routerLink="/buildings/create">
+        <span class="icon-[tabler--plus]"></span> Add new
+      </button>
+    </div>
+    <div class="border-base-content/25 w-full rounded-lg border">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Full name</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for(building of buildingStore.buildings() | buildingSearch : searchForm.name().value();
+            track building.id){
+            <tr>
+              <td>{{ building.name }}</td>
+              <td>{{ building.fullName }}</td>
+              <td>{{ building.description }}</td>
+              <td>
+                <button
+                  class="btn btn-circle btn-text btn-sm"
+                  aria-label="Action button"
+                  (click)="onEdit(building.id!)"
+                >
+                  <span class="icon-[tabler--pencil] size-6 text-primary"></span>
+                </button>
+                <button
+                  class="btn btn-circle btn-text btn-sm"
+                  aria-label="Action button"
+                  (click)="onDelete(building.id!)"
+                >
+                  <span class="icon-[tabler--trash] size-6 text-error"></span>
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

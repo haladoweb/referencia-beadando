@@ -1,0 +1,19 @@
+<aside
+  id="collapsible-sidebar"
+  class="overlay rounded-xl [--body-scroll:true] overlay-open:translate-x-0 drawer drawer-start sm:overlay-layout-open:translate-x-0 hidden w-64 [--auto-close:sm] [--is-layout-affect:true] [--opened:lg] sm:absolute sm:z-0 sm:flex sm:shadow-none lg:[--overlay-backdrop:false] bg-base-100"
+  role="dialog"
+  tabindex="-1"
+>
+  <div class="drawer-body px-2 pt-6">
+    <ul class="menu p-0">
+      @for(item of sidebarItems; track item.label){
+      <li>
+        <a [routerLink]="item.routerLink">
+          <span [class]="getIconClass(item.icon)"></span>
+          {{ item.label }}
+        </a>
+      </li>
+      }
+    </ul>
+  </div>
+</aside>
