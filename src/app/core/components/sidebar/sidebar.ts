@@ -13,7 +13,7 @@ export class Sidebar {
     {
       label: 'Home',
       icon: 'home',
-      routerLink: 'home',
+      routerLink: '',
     },
     {
       label: 'Buildings',

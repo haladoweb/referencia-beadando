@@ -1,1 +1,7 @@
-<mgl-map [style]="style" [zoom]="[15]" [center]="center()" (mapLoad)="onMapLoad($event)"></mgl-map>
+<mgl-map
+  #map
+  [style]="style"
+  [zoom]="[15]"
+  [center]="center()"
+  (mapLoad)="onMapLoad($event)"
+></mgl-map>

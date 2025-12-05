@@ -2,3 +2,7 @@ mgl-map {
   height: 100%;
   width: 100%;
 }
+
+::ng-deep .popup .maplibregl-popup-content {
+  padding: 0;
+}

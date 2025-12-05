@@ -1,8 +1,10 @@
 import { Component, effect, input, OnInit, output, signal } from '@angular/core';
 import { MapComponent } from '@maplibre/ngx-maplibre-gl';
 import { Feature, Polygon, Position } from 'geojson';
-import { StyleSpecification, Map as MapLibreMap, IControl } from 'maplibre-gl';
+import { StyleSpecification, Map as MapLibreMap, IControl, LngLatBounds, Popup } from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
+import { PolygonOptions } from '../../model/polygon.model';
+import { centroid } from '@turf/turf';
 
 @Component({
   selector: 'app-map',
@@ -13,9 +15,11 @@ import MapLibreDraw from 'maplibre-gl-draw';
 export class Map implements OnInit {
   constructor() {
     effect(() => {
-      const polygon = this.polygon();
-      if (!polygon) return;
-      this.drawPolygon(polygon);
+      if (this.readonly()) return;
+
+      const polygons = this.polygons();
+      if (polygons.length === 0 || !this.draw) return;
+      this.drawPolygons(polygons);
     });
   }
 
@@ -42,14 +46,26 @@ export class Map implements OnInit {
 
   protected style!: StyleSpecification;
   private draw!: MapLibreDraw;
+  protected map!: MapLibreMap;
 
-  polygon = input<Position[][]>();
+  polygons = input<PolygonOptions[]>([]);
+  readonly = input(false);
 
   polygonChangedAction = output<Position[][]>();
 
   center = signal<[number, number]>([17.908950535135272, 47.088969173638375]);
 
   onMapLoad(map: MapLibreMap) {
+    this.map = map;
+
+    if (!this.readonly()) {
+      this.addDraw(map);
+    } else {
+      this.addBuildingsLayer();
+    }
+  }
+
+  addDraw(map: MapLibreMap) {
     this.draw = new MapLibreDraw({
       displayControlsDefault: false,
       controls: {
@@ -66,6 +82,8 @@ export class Map implements OnInit {
   }
 
   onDrawEvent(e: { features: Feature<Polygon>[]; type: string }) {
+    if (this.readonly()) return;
+
     if (e.type === 'draw.delete') {
       this.polygonChangedAction.emit([]);
       return;
@@ -76,42 +94,107 @@ export class Map implements OnInit {
     }
   }
 
-  drawPolygon(polygon: Position[][]) {
-    if (polygon && polygon.length > 0) {
-      const feature: Feature = {
-        geometry: {
-          coordinates: polygon,
-          type: 'Polygon',
-        },
-        properties: {},
-        type: 'Feature',
-      };
-      this.draw.add(feature);
-      this.calculateCurrentPosition(polygon);
-    }
+  drawPolygons(polygons: PolygonOptions[]) {
+    polygons.forEach((polygon) => {
+      if (polygon && polygon.coordinates.length > 0) {
+        const feature: Feature = {
+          geometry: {
+            coordinates: polygon.coordinates,
+            type: 'Polygon',
+          },
+          properties: { color: polygon.color },
+          type: 'Feature',
+        };
+        const id = this.draw.add(feature);
+        if (this.readonly()) {
+          this.draw.setFeatureProperty(id[0], 'user_no_edit', true);
+        }
+      }
+    });
+    this.calculateCurrentPosition();
   }
+  addBuildingsLayer() {
+    if (!this.map || this.polygons().length === 0) return;
 
-  calculateCurrentPosition(polygon: Position[][]) {
-    const coordinates = polygon
-      .flatMap((coords) => coords)
-      .map(([lng, lat]) => [parseFloat(lng.toString()), parseFloat(lat.toString())]);
-
-    let minLng = 0;
-    let maxLng = 99999;
-    let minLat = 0;
-    let maxLat = 99999;
-
-    coordinates.forEach(([lng, lat]) => {
-      if (lng > minLng) minLng = lng;
-      if (lng < maxLng) maxLng = lng;
-      if (lat > minLat) minLat = lat;
-      if (lat < maxLat) maxLat = lat;
+    this.map.addSource('buildings', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: this.polygons().map((polygon) => ({
+          geometry: {
+            coordinates: polygon.coordinates,
+            type: 'Polygon',
+          },
+          properties: {
+            popUpTitle: polygon.popUpTitle,
+            popUpContent: polygon.popUpContent,
+            color: polygon.color,
+          },
+          type: 'Feature',
+        })),
+      },
     });
 
-    const center: [number, number] = [
-      minLng + (maxLng - minLng) / 2,
-      minLat + (maxLat - minLat) / 2,
-    ];
-    this.center.set(center);
+    this.map.addLayer({
+      id: 'buildings',
+      source: 'buildings',
+      type: 'fill',
+      paint: {
+        'fill-color': ['coalesce', ['get', 'color'], '#ff0000'],
+        'fill-opacity': 0.5,
+      },
+    });
+    this.map.addLayer({
+      id: 'buildings-outline',
+      source: 'buildings',
+      type: 'line',
+      paint: {
+        'line-color': ['coalesce', ['get', 'color'], '#ff0000'],
+        'line-width': 2,
+        'line-opacity': 1,
+      },
+    });
+
+    const popup = new Popup({
+      closeButton: false,
+      closeOnClick: false,
+      className: 'popup',
+    });
+
+    this.map.on('mouseenter', ['buildings', 'buildings-outline'], (e) => {
+      this.map.getCanvas().style.cursor = 'pointer';
+
+      if (!e.features || !e) return;
+      const feature = e.features[0] as Feature<Polygon>;
+
+      if (!feature.properties) return;
+      const center = centroid(feature).geometry.coordinates as [number, number];
+      const title = feature.properties['popUpTitle'];
+      const content = feature.properties['popUpContent'];
+
+      popup
+        .setLngLat(center)
+        .setHTML(
+          `<div class="bg-base-200 text-primary-content p-5"><strong class="text-xl">${title}</strong><br>${content}</div>`
+        )
+        .addTo(this.map);
+    });
+
+    this.map.on('mouseleave', ['buildings', 'buildings-outline'], (e) => {
+      this.map.getCanvas().style.cursor = '';
+      popup.remove();
+    });
+
+    this.calculateCurrentPosition();
+  }
+
+  calculateCurrentPosition() {
+    const coordinates = this.polygons()
+      .flatMap((polygon) => polygon.coordinates)
+      .flatMap((ring) => ring);
+    if (coordinates.length === 0) return;
+    const bounds = new LngLatBounds();
+    coordinates.forEach((coord) => bounds.extend([coord[0], coord[1]]));
+    this.map.fitBounds(bounds, { padding: 250 });
   }
 }

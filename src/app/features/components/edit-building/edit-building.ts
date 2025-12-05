@@ -7,10 +7,11 @@ import { Building } from '../../buildings/model/building.model';
 import { Position } from 'geojson';
 import { TextareaInput } from '../../../core/components/textarea-input/textarea-input';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ColorPicker } from '../../../core/components/color-picker/color-picker';
 
 @Component({
   selector: 'app-edit-building',
-  imports: [Map, TextInput, TextareaInput],
+  imports: [Map, TextInput, TextareaInput, ColorPicker],
   templateUrl: './edit-building.html',
   styleUrl: './edit-building.css',
 })
@@ -40,6 +41,7 @@ export class EditBuilding implements OnInit, OnDestroy {
     fullName: '',
     description: '',
     boundary: [],
+    color: '#285880',
   });
   protected readonly buildingForm = form(this.buildingModel, (schemePath) => {
     required(schemePath.name, { message: 'Name is required' });
@@ -87,5 +89,9 @@ export class EditBuilding implements OnInit, OnDestroy {
     } else {
       this.buildingStore.createBuilding(building);
     }
+  }
+
+  onCancel() {
+    this.router.navigateByUrl('/buildings');
   }
 }

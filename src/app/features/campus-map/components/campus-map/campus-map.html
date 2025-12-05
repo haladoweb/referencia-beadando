@@ -1,0 +1,14 @@
+<div class="card w-full h-full">
+  <div class="card-body">
+    <div class="flex justify-between">
+      <app-text-input [field]="searchForm.name" label="Search"></app-text-input>
+    </div>
+    @if(buildingStore.buildings().length > 0){
+    <app-map
+      class="h-full"
+      [readonly]="true"
+      [polygons]="buildingStore.buildingPolygons()"
+    ></app-map>
+    }
+  </div>
+</div>

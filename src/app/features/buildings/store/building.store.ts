@@ -1,11 +1,12 @@
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { Building } from '../model/building.model';
-import { inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import { BuildingService } from '../services/building.service';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
 import { Router } from '@angular/router';
+import { PolygonOptions } from '../../../core/model/polygon.model';
 
 interface BuildingsState {
   buildings: Building[];
@@ -20,6 +21,26 @@ const initialState: BuildingsState = {
 export const BuildingStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
+  withComputed(({ buildings, editedBuilding }) => ({
+    buildingPolygons: computed<PolygonOptions[]>(() =>
+      buildings().map((building) => ({
+        coordinates: building.boundary,
+        color: building.color,
+        popUpTitle: `${building.fullName} (${building.name})`,
+        popUpContent: building.description,
+      }))
+    ),
+    editedBuildingPolygon: computed<PolygonOptions | null>(() =>
+      editedBuilding()
+        ? {
+            coordinates: editedBuilding()!.boundary,
+            color: editedBuilding()!.color,
+            popUpTitle: `${editedBuilding()!.fullName} (${editedBuilding()!.name})`,
+            popUpContent: editedBuilding()!.description,
+          }
+        : null
+    ),
+  })),
   withMethods((store, buildingService = inject(BuildingService), router = inject(Router)) => {
     const getBuildings = rxMethod<void>(
       pipe(
