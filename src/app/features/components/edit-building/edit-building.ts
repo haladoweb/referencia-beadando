@@ -20,6 +20,8 @@ export class EditBuilding implements OnInit, OnDestroy {
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
 
+  //TODO breadcrumbs here
+
   constructor() {
     effect(() => {
       const editedBuilding = this.buildingStore.editedBuilding();
