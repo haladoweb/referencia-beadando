@@ -6,12 +6,12 @@ import { TextInput } from '../../../core/components/text-input/text-input';
 import { Building } from '../../buildings/model/building.model';
 import { Position } from 'geojson';
 import { TextareaInput } from '../../../core/components/textarea-input/textarea-input';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ColorPicker } from '../../../core/components/color-picker/color-picker';
 
 @Component({
   selector: 'app-edit-building',
-  imports: [Map, TextInput, TextareaInput, ColorPicker],
+  imports: [Map, TextInput, TextareaInput, ColorPicker, RouterLink],
   templateUrl: './edit-building.html',
   styleUrl: './edit-building.css',
 })
@@ -19,8 +19,6 @@ export class EditBuilding implements OnInit, OnDestroy {
   protected readonly buildingStore = inject(BuildingStore);
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
-
-  //TODO breadcrumbs here
 
   constructor() {
     effect(() => {
