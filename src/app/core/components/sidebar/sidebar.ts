@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthStore } from '../../../features/auth/store/auth.store';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,6 +10,8 @@ import { RouterLink } from '@angular/router';
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
+  protected readonly authStore = inject(AuthStore);
+
   protected readonly sidebarItems = [
     {
       label: 'Home',

@@ -7,19 +7,23 @@ import { pipe, switchMap } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
 import { Router } from '@angular/router';
 import { PolygonOptions } from '../../../core/model/polygon.model';
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
 
 interface BuildingsState {
   buildings: Building[];
+  buildingsLoaded: boolean;
   editedBuilding: Building | null;
 }
 
 const initialState: BuildingsState = {
   buildings: [],
+  buildingsLoaded: false,
   editedBuilding: null,
 };
 
 export const BuildingStore = signalStore(
   { providedIn: 'root' },
+  withDevtools('buildings'),
   withState(initialState),
   withComputed(({ buildings, editedBuilding }) => ({
     buildingPolygons: computed<PolygonOptions[]>(() =>
@@ -47,7 +51,7 @@ export const BuildingStore = signalStore(
         switchMap(() =>
           buildingService.getBuildings().pipe(
             tapResponse({
-              next: (buildings) => patchState(store, { buildings }),
+              next: (buildings) => patchState(store, { buildings, buildingsLoaded: true }),
               error: () => {},
             })
           )

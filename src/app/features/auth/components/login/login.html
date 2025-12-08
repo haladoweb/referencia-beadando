@@ -1,0 +1,19 @@
+<div class="h-full w-full flex items-center justify-center">
+  <div class="card">
+    <div class="card-body">
+      <div class="flex flex-col gap-4">
+        <app-text-input [field]="loginForm.username" label="Username" />
+        <app-password-input [field]="loginForm.password" label="Password" />
+      </div>
+      <div class="flex gap-4 justify-center">
+        <button
+          class="btn btn-primary btn-soft"
+          (click)="onLogin()"
+          [disabled]="loginForm().invalid() || !loginForm().touched()"
+        >
+          Login
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { Component, computed } from '@angular/core';
 import { ColorPickerDirective } from 'ngx-color-picker';
+import { Input } from '../input.component';
 
 @Component({
   selector: 'app-color-picker',
@@ -9,9 +9,7 @@ import { ColorPickerDirective } from 'ngx-color-picker';
   templateUrl: './color-picker.html',
   styleUrl: './color-picker.css',
 })
-export class ColorPicker {
-  readonly field = input.required<FieldTree<string>>();
-  readonly label = input.required<string>();
+export class ColorPicker extends Input<string> {
   protected readonly color = computed(() => this.field()().value());
 
   onChange(color: string) {

@@ -1,7 +1,9 @@
 <div
   class="sm:overlay-layout-open:ps-66 transition-all duration-300 h-screen flex flex-col bg-base-200 py-0.5 px-5"
 >
-  <app-sidebar></app-sidebar>
+  @if(authStore.isLoggedIn()){
+
+  <app-sidebar></app-sidebar>}
   <app-navbar></app-navbar>
 
   <div class="flex flex-1">

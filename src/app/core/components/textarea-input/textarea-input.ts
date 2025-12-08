@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { Component } from '@angular/core';
+import { Field } from '@angular/forms/signals';
+import { Input } from '../input.component';
 
 @Component({
   selector: 'app-textarea-input',
@@ -8,7 +9,4 @@ import { Field, FieldTree } from '@angular/forms/signals';
   templateUrl: './textarea-input.html',
   styleUrl: './textarea-input.css',
 })
-export class TextareaInput {
-  field = input.required<FieldTree<string>>();
-  label = input.required<string>();
-}
+export class TextareaInput extends Input<string> {}
