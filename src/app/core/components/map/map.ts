@@ -1,10 +1,11 @@
-import { Component, effect, input, OnInit, output, signal } from '@angular/core';
+import { Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
 import { MapComponent } from '@maplibre/ngx-maplibre-gl';
 import { Feature, Polygon, Position } from 'geojson';
 import { StyleSpecification, Map as MapLibreMap, IControl, LngLatBounds, Popup } from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
 import { PolygonOptions } from '../../model/polygon.model';
 import { centroid } from '@turf/turf';
+import { ThemeStore } from '../../store/theme.store';
 
 @Component({
   selector: 'app-map',
@@ -13,6 +14,8 @@ import { centroid } from '@turf/turf';
   styleUrl: './map.css',
 })
 export class Map implements OnInit {
+  protected readonly themeStore = inject(ThemeStore);
+
   constructor() {
     effect(() => {
       if (this.readonly()) return;
@@ -20,6 +23,43 @@ export class Map implements OnInit {
       const polygons = this.polygons();
       if (polygons.length === 0 || !this.draw) return;
       this.drawPolygons(polygons);
+    });
+
+    effect(() => {
+      const isDark = this.themeStore.isDark();
+      if (!this.map) return;
+
+      const source = this.map.getSource('osm');
+      if (!source) return;
+
+      const tiles = [
+        isDark
+          ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+          : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      ];
+
+      this.map.removeLayer('osm-layer');
+      this.map.removeSource('osm');
+
+      this.map.addSource('osm', {
+        type: 'raster',
+        tiles,
+        tileSize: 256,
+        attribution: '© OpenStreetMap contributors',
+      });
+
+      const beforeLayer = this.readonly() ? 'buildings' : 'gl-draw-polygon-fill-inactive.cold';
+
+      this.map.addLayer(
+        {
+          id: 'osm-layer',
+          source: 'osm',
+          type: 'raster',
+        },
+        beforeLayer
+      );
+
+      this.map.triggerRepaint();
     });
   }
 
@@ -29,7 +69,11 @@ export class Map implements OnInit {
       sources: {
         osm: {
           type: 'raster',
-          tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
+          tiles: [
+            this.themeStore.isDark()
+              ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+              : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          ],
           tileSize: 256,
           attribution: '© OpenStreetMap contributors',
         },

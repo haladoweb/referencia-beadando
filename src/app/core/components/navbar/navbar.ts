@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { AuthStore } from '../../../features/auth/store/auth.store';
+import { ThemeSwitch } from '../theme-switch/theme-switch';
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  imports: [ThemeSwitch],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
